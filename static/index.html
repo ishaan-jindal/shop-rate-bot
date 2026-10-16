@@ -1,0 +1,15 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>Dukaan Box</title>
+<style>body{font-family:system-ui,sans-serif;max-width:520px;margin:2em auto;padding:0 1em}
+.row{display:flex;gap:.5em;margin:.5em 0}input,button{font-size:1em;padding:.5em}
+#q{flex:1}#dot{width:.8em;height:.8em;border-radius:50%;background:#888;display:inline-block}</style>
+<h1>Shop Rate Bot <span id=dot></span></h1>
+<div class=row><input id=q placeholder="rice price? / open?"><button onclick=ask()>Ask</button></div>
+<p id=a></p>
+<script>
+async function j(u,o){try{const r=await fetch(u,o);return await r.json()}catch(e){return{}}}
+async function ask(){const q=document.getElementById('q').value;
+ const r=await j('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q})});
+ document.getElementById('a').textContent=r.answer||'offline — try again';
+ document.getElementById('dot').style.background=r.used_local_model?'#0a0':'#888'}
+</script>

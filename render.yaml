@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: dukaan-box
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    # No Ollama on Render free -> deterministic stub fallback serves the demo.
