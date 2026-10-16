@@ -35,33 +35,43 @@ def _stub(q: str) -> str:
 
 def _try_ollama(q: str) -> str | None:
     global _WARNED
+    import urllib.error  # lazy: no hard dep
     import urllib.request  # lazy: no hard dep
 
     host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
-    model = os.getenv("GEMMA_MODEL", "gemma3n:e2b")
+    first = os.getenv("GEMMA_MODEL", "gemma4:e2b")
+    models = [first] + [m for m in ("gemma4:e2b", "gemma3n:e2b") if m != first]
     prompt = (
         'Shop FAQ bot. Reply ONLY JSON {"answer": "<<=25 words>"}. '
         f"Rates: {json.dumps(RATES)}. Hours: {HOURS}. Q: {q}"
     )
-    req = urllib.request.Request(
-        f"{host}/api/generate",
-        data=json.dumps({"model": model, "prompt": prompt, "stream": False}).encode(),
-        headers={"Content-Type": "application/json"},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=8) as r:
-            out = json.loads(r.read().decode())
-    except Exception:
-        if not _WARNED:
-            _WARNED = True
-            print("[brain] Ollama unreachable, stub fallback (grey dot).")
-        return None
-    try:
-        txt = out.get("response", "")
-        ans = json.loads(txt[txt.find("{") : txt.rfind("}") + 1])["answer"]
-        return str(ans)[:200] if ans else None
-    except Exception:
-        return None
+    for model in models:
+        req = urllib.request.Request(
+            f"{host}/api/generate",
+            data=json.dumps(
+                {"model": model, "prompt": prompt, "stream": False}
+            ).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=8) as r:
+                out = json.loads(r.read().decode())
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                continue  # tag not pulled — try next candidate
+            return None
+        except Exception:
+            if not _WARNED:
+                _WARNED = True
+                print("[brain] Ollama unreachable, stub fallback (grey dot).")
+            return None
+        try:
+            txt = out.get("response", "")
+            ans = json.loads(txt[txt.find("{") : txt.rfind("}") + 1])["answer"]
+            return str(ans)[:200] if ans else None
+        except Exception:
+            return None
+    return None
 
 
 def ask(q: str) -> dict:

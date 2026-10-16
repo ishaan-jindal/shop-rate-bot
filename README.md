@@ -12,7 +12,7 @@ uv run uvicorn app:app --app-dir src --reload
 # open http://127.0.0.1:8000
 ```
 
-Real local model (optional): `ollama run gemma3n:e2b` (or set `$GEMMA_MODEL`).
+Real local model (optional): `ollama run gemma4:e2b` (or set `$GEMMA_MODEL`; falls back to `gemma3n:e2b`).
 No keys, no DB, no auth, no torch. Without Ollama the stub answers;
 `used_local_model` flag shows which path ran.
 

@@ -8,8 +8,9 @@ dependencies = [
   "uvicorn>=0.30",
 ]
 
-# Optional: `ollama run gemma3n:e2b` (or $GEMMA_MODEL) for the real
-# local-model brain. App boots and serves the deterministic stub without it.
+# Optional: `ollama run gemma4:e2b` (or $GEMMA_MODEL; falls back to gemma3n:e2b)
+# for the real local-model brain. App boots and serves the deterministic
+# stub without it.
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
